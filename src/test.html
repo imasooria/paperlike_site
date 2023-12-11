@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+  <g:requires name="scripts/jquery.signaturepad.min.jsx" includes="true" />
+  <g:requires name="scripts/signature_pad.jsx" includes="true" />
+  <g:requires name="scripts/classes/json2.jsx" includes="true" />
+  <g:requires name="styles/jquery.signaturepad.cssx" includes="true" />
+  <!-- <g:requires name="styles/heisenberg/heisenberg_all.cssx" includes="true" /> -->
+  <g:ui_form id="e-signature-hr-template-form">
+    <input type="hidden" id="sys_id" name="sys_id" value="${sysparm_taskId}"/>
+    <input type="hidden" id="parent" name="parent"/>
+    <input type="hidden" id="esign_type" name="esign_type"/>
+    <input type="hidden" id="table_name" name="table_name"/>
+    <input type="hidden" id="domain" name="domain"/>
+    <input type="hidden" id="isPdfTemplate" name="isPdfTemplate"/>
+    <input type="hidden" id="pdfTemplateSysId" name="pdfTemplateSysId"/>
+    <input type="hidden" id="canvasEnabled" name="canvasEnabled"/>
+    <input type="hidden" id="ackChecked" name="ackChecked"/>
+
+    <script>
+      addLoadEvent(function(){
+        onLoadFunction();
+      });
+    </script>
+    <style type="text/css">
+      .e-signature-dialog {
+        display: none;
+        flex-direction:column;
+      }
+
+      #document_not_available {
+        display: none;
+      }
+
+      .iframe-container {
+        z-index : 1;
+        margin-right:auto;
+        margin-left:auto;
+        overflow: auto;
+      }
+
+      .label {
+        color: #000;
+      }
+
+      #acknowledgement {
+        padding-top: 20px;
+      }
+
+      #acknowledgement_content {
+      }
+
+      #acknowledgement_col1 {
+        vertical-align: top;
+      }
+
+
+      #acknowledgement_checkbox {
+        vertical-align: top;
+      }
+
+      #acknowledgement_text {
+        color: #2E2E2E;
+        font-family: "SourceSansPro", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        word-break: break-all;
+      }
+
+      #signature_pad {
+      }
+
+      #signTabLink {
+        color:#165C53;
+        border: none;
+        background-color: transparent;
+        height: 58px;
+      }
+
+      li#signTabLink.active {
+        border-bottom: 3px solid;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        background-color: RGB(var(--now-color_background--primary, 255, 255, 255));;
+        border-bottom-color: #1F8476;
+      }
+
+      li#signTabLink:hover {
+        border-bottom: 3px solid #cbcbcb;
+        border-bottom-color: #a9a9a9;
+        background-color: #f1f1f1;
+      }
+
+      .nav-tabs li.active a, .nav-tabs li.active a:hover, .nav-tabs li.active a:focus {
+        color: #4a4a4a;
+      }
+
+      .signItLink {
+        cursor: pointer !important;
+      }
+
+      #signed_name {
+        width: 100%;
+        padding-left:8px;
+        height:32px;
+        border:1px solid #cbcbcb;
+      }
+
+      #signed_name:focus {
+        outline: none !important;
+        border-color: #165C53;
+        box-shadow: 0 0 10px;
+        color: #165C53;
+      }
+
+      #typeFullName {
+        font-size: 13px;
+        font-weight: lighter;
+        margin: 10px 0px 0px 0px;
+      }
+
+      #clearSignatureBtn{
+        float: right;
+        font-size: 13px;
+        padding-bottom:5px;
+        text-decoration:none;
+      }
+
+      .e-sign-document{
+        border: solid 1px #cbcbcb;
+      }
+
+      #drawCanvas{
+        border-radius:3px;
+        border: 1px solid #cbcbcb;
+      }
+
+      .typedCanvas {
+        display: none;
+      }
+
+      #typeItDesc {
+        display: block;
+        margin:0;
+      }
+
+      .drawItDesc{
+        padding-top:20px;
+      }
+
+      #drawPad {
+        width: 850px;
+        padding-top: 5px;
+        padding-left: 5px;
+      }
+
+      #sigPad{
+        width: 100%;
+      }
+
+      #sign_disclaimer {
+        font-size: 12px;
+        padding-left: 0px;
+        color:#343d47;
+        background-color:transparent;
+      }
+
+      #signAcceptButton {
+        float: right;
+        padding-top: 20px;
+        padding-bottom: 5px;
+      }
+
+      #signAcceptButton {
+        float: right;
+      }
+
+      .nav-tabs li {
+        padding: 0px;
+      }
+
+      .nav-tabs li a {
+        color: #1F8476;
+        padding: 10px 15px;
+        border: 0px;
+        height: 58px;
+        font-size: 14px;
+        line-height: 30px;
+      }
+
+      #html_content_id{
+        overflow: auto;
+        padding: 0px 10px 10px 10px;
+      }
+
+      .padding-bottom-15{
+        padding-bottom:15px;
+      }
+
+      #drawCanvas{
+        border-radius:3px;
+        border: 1px solid #cbcbcb;
+      }
+
+      div.acknowledgement_item{
+        position: fixed;
+        bottom: 15px;
+        width: 95%;
+      }
+    </style>
+    <div id="e-signature-dialog" class="e-signature-dialog">
+      <div class="e-sign-document" style = "overflow:auto">
+        <div class="iframe-container">
+          <iframe onload="this.style.height= parseInt(document.getElementById('e-signature-dialog').clientHeight) - parseInt(document.getElementById('acknowledgement_items').clientHeight) - parseInt('75') +'px';"
+                  id='iframe_pdf_preview' type="application/pdf" style="display:none;width: 100%; z-index:-5" class="animate hidden-xs">IFrame for managed document</iframe>
+          <div id='html_content_id' style="display:none"></div>
+        </div>
+
+      </div>
+      <div class="acknowledgement_items" id="acknowledgement_items">
+        <div id="acknowledgement">
+          <div id="acknowledgement_content">
+            <table id="acknowledgement_table">
+              <tr id="acknowledgement_row">
+                <td id="acknowledgement_col1">
+								<span class="input-group-checkbox">
+								<input class="checkbox" id="acknowledgement_checkbox" type="checkbox" onchange="toggleAcknowledgementCheckBox(this.checked)"></input>
+								<label for="acknowledgement_checkbox" class="checkbox-label" style="margin:0px;"></label>
+                                </span>
+                </td>
+                <td>
+                  <div id="acknowledgement_text"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id="signature_pad">
+          <div id="sigPad" class="sigPad">
+            <j:if test="${sysparm_draw_only != 'true'}">
+              <ul class="nav nav-tabs sn-tabs-basic" style="display: block;overflow: unset;margin-top: 20px;">
+                <li id="signTabLink" class="typeIt"><a href="#type-it" id='typeItLink' class="signItLink" onClick="enableCanvas(false);">${gs.getMessage('Type signature')}</a></li>
+                <li id="signTabLink" class="drawIt" ><a href="#draw-it" id='drawItLink' class="signItLink" onClick="enableCanvas(true);">${gs.getMessage('Draw signature')}</a></li>
+              </ul>
+              <div id="typeItDesc" class="typeItDesc">
+                <label id="typeFullName" for="signed_name">${gs.getMessage('Full name')}</label>
+                <input type="text" aria-label="Print your name here to acknowledge or sign the document" name="signed_name" id="signed_name" class="signed_name" maxlength="25" onkeyup = "toggleAcceptButton()"/>
+              </div>
+              <div class="drawItDesc" onClick="toggleAcceptButton()">
+                <a id="clearSignatureBtn" class="clearButton" href="#clear" >${gs.getMessage('Clear signature')}</a>
+              </div>
+            </j:if>
+            <div id="drawCanvas" class="sig sigWrapper" style="display: none;border-radius:3px">
+              <div class="typed"></div>
+              <canvas id="drawPad" class="pad" width="850" height="150" onmouseup = "setTimeout(toggleAcceptButton, 100);"></canvas>
+              <input type="hidden" name="output" class="output" id ="drawPad_image"/>
+            </div>
+
+            <div id="sign_disclaimer" class="label">${gs.getMessage('This constitutes your electronic signature and has the same legal impact as signing a printed version of this document.')}</div>
+          </div>
+          <div style="float:right">
+            <div id="signAcceptButton">
+              <button id="sign_accept_button" class="btn btn-primary" onClick="signDocument();return false">
+                ${gs.getMessage('Accept and complete')}
+              </button>
+            </div>
+            <input type="hidden" id="btn_clicked" name="btn_clicked" value="none"></input>
+          </div>
+          <canvas id="typedCanvas" style="display:none;"></canvas>
+        </div>
+      </div>
+    </div>
+    <div id="document_not_available">
+      <span id="document_not_available_label">${gs.getMessage('This document could not be loaded. Please contact your administrator for assistance.')}</span>
+    </div>
+
+
+  </g:ui_form>
+</j:jelly>
